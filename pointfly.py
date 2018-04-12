@@ -294,3 +294,60 @@ def dense(input, output, name, is_training, reuse=None, with_bn=True, activation
                             kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=1.0),
                             reuse=reuse, name=name, use_bias=not with_bn)
     return batch_normalization(dense, is_training, name + '_bn', reuse) if with_bn else dense
+
+
+def max_pool2d(inputs, kernel_size, name ,stride=[2, 2], padding='VALID'):
+  """ 2D max pooling.
+
+  Args:
+    inputs: 4-D tensor BxHxWxC
+    kernel_size: a list of 2 ints
+    stride: a list of 2 ints
+  
+  Returns:
+    Variable tensor
+  """
+  outputs = tf.layers.max_pooling2d(inputs,
+                                      pool_size=kernel_size,
+                                      strides=stride,
+                                      padding=padding,
+                                      name = name)
+  return outputs
+
+def fully_connected(inputs,
+                    num_outputs,
+                    scope,
+                    use_xavier=True,
+                    stddev=1e-3,
+                    weight_decay=0.0,
+                    activation_fn=tf.nn.relu,
+                    with_bn=True,
+                    bn_decay=None,
+                    is_training=None):
+  """ Fully connected layer with non-linear operation.
+  
+  Args:
+    inputs: 2-D tensor BxN
+    num_outputs: int
+  
+  Returns:
+    Variable tensor of size B x num_outputs.
+  """
+  with tf.variable_scope(scope) as sc:
+    num_input_units = inputs.get_shape()[-1].value
+    weights = _variable_with_weight_decay('weights',
+                                          shape=[num_input_units, num_outputs],
+                                          use_xavier=use_xavier,
+                                          stddev=stddev,
+                                          wd=weight_decay)
+    outputs = tf.matmul(inputs, weights)
+    biases = _variable_on_cpu('biases', [num_outputs],
+                             tf.constant_initializer(0.0))
+    outputs = tf.nn.bias_add(outputs, biases)
+     
+    if with_bn:
+      outputs = batch_normalization(outputs, is_training, scope + '_bn', reuse) 
+
+    if activation_fn is not None:
+      outputs = activation_fn(outputs)
+    return outputs

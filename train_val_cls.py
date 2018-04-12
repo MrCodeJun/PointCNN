@@ -56,8 +56,8 @@ def main():
 
     # Prepare inputs
     print('{}-Preparing datasets...'.format(datetime.now()))
-    data_train, label_train, data_val, label_val = setting.load_fn(args.path, args.path_val)
-
+    data_train, label_train, data_val, label_val = setting.load_fn(args.path, args.path_val) #data_train.shape=[9840,2048,6]
+    print(data_val.shape)    #1
     if setting.save_ply_fn is not None:
         folder = os.path.join(root_folder, 'pts')
         print('{}-Saving samples as .ply files to {}...'.format(datetime.now(), folder))
@@ -93,6 +93,7 @@ def main():
 
     ######################################################################
     dataset_train = tf.data.Dataset.from_tensor_slices((data_train_placeholder, label_train_placeholder))
+    print(dataset_train)#2
     if setting.map_fn is not None:
         dataset_train = dataset_train.map(lambda data, label: tuple(tf.py_func(
             setting.map_fn, [data, label], [tf.float32, label.dtype])), num_parallel_calls=setting.num_parallel_calls)
@@ -136,9 +137,8 @@ def main():
                 features_augmented = features_sampled
     else:
         points = pts_fts
-    points_sampled = tf.gather_nd(points, indices=indices, name='points_sampled')
+    points_sampled = tf.gather_nd(points, indices=indices, name='points_sampled')   #points[?,2048,3]
     points_augmented = pf.augment(points_sampled, xforms, jitter_range)
-
     net = model.Net(points=points_augmented, features=features_augmented, num_class=num_class,
                     is_training=is_training, setting=setting)
     logits, probs = net.logits, net.probs
@@ -273,7 +273,7 @@ def main():
                 sess.run([train_op, loss_op, t_1_acc_op, summaries_op],
                          feed_dict={
                              handle: handle_train,
-                             indices: pf.get_indices(batch_size_train, sample_num_train, point_num),
+                             indices: pf.get_indices(batch_size_train, sample_num, point_num),##sample_num_train
                              xforms: xforms_np,
                              rotations: rotations_np,
                              jitter_range: np.array([jitter]),

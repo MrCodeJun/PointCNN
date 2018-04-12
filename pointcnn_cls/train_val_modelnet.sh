@@ -44,4 +44,5 @@ fi
 
 
 echo "Train/Val with setting $setting on GPU $gpu!"
-CUDA_VISIBLE_DEVICES=$gpu python3 ../train_val_cls.py -t ../../data/modelnet/train_files.txt -v ../../data/modelnet/test_files.txt -s ../../models/cls -m pointcnn_cls -x $setting > ../../models/cls/pointcnn_cls_$setting.txt 2>&1 &
+#CUDA_VISIBLE_DEVICES=$gpu python3 ../train_val_cls.py -t ../../data/modelnet/train_files.txt -v ../../data/modelnet/test_files.txt -s ../../models/cls -m pointcnn_cls -x $setting > ../../models/cls/pointcnn_cls_$setting.txt 2>&1 &
+python3 ../train_val_cls.py -t ../../data/modelnet/train_files.txt -v ../../data/modelnet/test_files.txt -s ../../models/cls -m pointcnn_cls -x $setting > ../../models/cls/pointcnn_cls_$setting.txt 2>&1 &
