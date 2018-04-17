@@ -183,11 +183,11 @@ class PointCNN:
 
         for layer_idx, layer_param in enumerate(fc_params):
             channel_num, drop_rate = layer_param
-            fc = pf.dense(self.fc_layers[-1], channel_num, 'fc{:d}'.format(layer_idx), is_training)
+            fc = pf.dense(self.fc_layers[-1], channel_num, 'fc{:d}'.format(layer_idx), is_training)  #[N,128,channel_num]???
             fc_drop = tf.layers.dropout(fc, drop_rate, training=is_training, name='fc{:d}_drop'.format(layer_idx))
             self.fc_layers.append(fc_drop)
 
-        logits = pf.dense(self.fc_layers[-1], num_class, 'logits', is_training, with_bn=False, activation=None)
+        logits = pf.dense(self.fc_layers[-1], num_class, 'logits', is_training, with_bn=False, activation=None) #[N,128,40?]???
         if task == 'classification':
             logits_mean = tf.reduce_mean(logits, axis=1, keep_dims=True, name='logits_mean')
             self.logits = tf.cond(is_training, lambda: logits, lambda: logits_mean)
